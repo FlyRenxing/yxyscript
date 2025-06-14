@@ -1,0 +1,46 @@
+name: '🎓 uLearning: 🔀 自定义行为过滤'
+desc: |-
+  uLearning 学习平台：行为追踪拦截 & 缓存数据过滤
+  可用于屏蔽特定行为上报、自定义缓存提交内容。
+openUrl: 'http://boxjs.com/#/app/uLearning.Filter'
+author: |-
+  YourName[https://github.com/YourName] 
+homepage: 'https://your-repo.io' 
+icon: 'https://example.com/icon.png' 
+category: '📚 教育学习'
+date: '2025-06-14 12:00:00'
+version: '0.1.0'
+
+
+# ========== MITM 设置 ==========
+mitm:
+  - 'utestapi.ulearning.cn'
+  - 'apps.ulearning.cn'
+
+
+# ========== HTTP 脚本规则 ==========
+http:
+  script:
+    # 拦截 setBehaviorTrace 并返回空响应
+    - match: ^https?://utestapi\.ulearning\.cn/exams/setBehaviorTrace
+      name: '🎓 uLearning.Filter.request'
+      type: request
+
+    # 拦截 saveExamLimit.do 并返回空响应
+    - match: ^https?://apps\.ulearning\.cn/exam/saveExamLimit\.do
+      name: '🎓 uLearning.Filter.request'
+      type: request
+
+    # 修改 saveLocalCache 请求体 JSON
+    - match: ^https?://utestapi\.ulearning\.cn/exams/saveLocalCache
+      name: '🎓 uLearning.Filter.request'
+      type: request
+      require-body: true
+      max-size: 1048576
+      timeout: 20
+
+# ========== 脚本提供者 ==========
+script-providers:
+  '🎓 uLearning.Filter.request':
+    url: https://yourserver.com/scripts/ulearning-filter.js 
+    interval: 86400
