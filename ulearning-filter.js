@@ -29,27 +29,39 @@ if (url.indexOf("saveLocalCache") !== -1) {
     console.log(logPrefix + "开始解析请求体");
     const data = JSON.parse($request.body);
     
-    if (data.behaviors && Array.isArray(data.behaviors)) {
-      const originalLength = data.behaviors.length;
-      console.log(logPrefix + "原始 behaviors 数量: " + originalLength);
+    // 检查是否为数组格式
+    if (Array.isArray(data) && data.length > 0) {
+      let totalFiltered = 0;
       
-      // 过滤行为数据
-      data.behaviors = data.behaviors.filter(item => {
-        const keep = item.behaviorType === 1 || item.behaviorType === 4;
-        if (!keep) {
-          console.log(logPrefix + "过滤 behaviorType: " + item.behaviorType);
+      // 遍历数组中的每个缓存对象
+      for (let i = 0; i < data.length; i++) {
+        const cacheItem = data[i];
+        
+        // 检查是否有 content 字段且为数组
+        if (cacheItem.content && Array.isArray(cacheItem.content)) {
+          const originalLength = cacheItem.content.length;
+          console.log(logPrefix + `缓存项 ${i} 原始 content 数量: ${originalLength}`);
+          
+          // 过滤 content 中的行为数据
+          cacheItem.content = cacheItem.content.filter(item => {
+            const keep = item.behaviorType === 1 || item.behaviorType === 4;
+            if (!keep) {
+              console.log(logPrefix + "过滤 behaviorType: " + item.behaviorType);
+              totalFiltered++;
+            }
+            return keep;
+          });
+          
+          const filteredLength = cacheItem.content.length;
+          console.log(logPrefix + `缓存项 ${i} 过滤后 content 数量: ${filteredLength}`);
         }
-        return keep;
-      });
+      }
       
-      const filteredLength = data.behaviors.length;
-      console.log(logPrefix + "过滤后 behaviors 数量: " + filteredLength);
-      console.log(logPrefix + "共过滤掉 " + (originalLength - filteredLength) + " 条记录");
-      
+      console.log(logPrefix + "总共过滤掉 " + totalFiltered + " 条记录");
       $done({body: JSON.stringify(data)});
       return;
     } else {
-      console.log(logPrefix + "未找到 behaviors 数组，直接放行");
+      console.log(logPrefix + "数据格式不符合预期，直接放行");
     }
   } catch (e) {
     console.log(logPrefix + "JSON解析失败: " + e.message);
