@@ -13,18 +13,18 @@ http:
     - match: ^https?://utestapi\.ulearning\.cn/exams/setBehaviorTrace
       name: ulearning-block
       type: request
-      timeout: 2
+      timeout: 8
     # 拦截考试限制接口  
     - match: ^https?://apps\.ulearning\.cn/exam/saveExamLimit\.do
       name: ulearning-block
       type: request
-      timeout: 2
+      timeout: 8
     # 修改缓存接口
     - match: ^https?://utestapi\.ulearning\.cn/exams/saveLocalCache
       name: ulearning-filter
       type: request
       require-body: true
-      timeout: 2
+      timeout: 8
       max-size: 262144
 
 script-providers:
