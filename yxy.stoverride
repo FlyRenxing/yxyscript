@@ -1,5 +1,5 @@
-name: '🎓 uLearning Filter'
-desc: 'uLearning学习平台行为追踪拦截与缓存数据过滤'
+name: '🎓 uLearning Block'
+desc: 'uLearning学习平台请求拦截，统一返回200响应'
 author: 'YourName'
 homepage: 'https://your-repo.io'
 icon: 'https://example.com/icon.png'
@@ -9,28 +9,17 @@ http:
     - "utestapi.ulearning.cn"
     - "apps.ulearning.cn"
   script:
-    # 拦截行为追踪接口
-    - match: ^https?://utestapi\.ulearning\.cn/exams/setBehaviorTrace
+    # 拦截所有相关请求
+    - match: ^https?://utestapi\.ulearning\.cn/exams/(setBehaviorTrace|saveLocalCache)
       name: ulearning-block
       type: request
-      timeout: 8
-    # 拦截考试限制接口  
+      timeout: 5
     - match: ^https?://apps\.ulearning\.cn/exam/saveExamLimit\.do
       name: ulearning-block
       type: request
-      timeout: 8
-    # 修改缓存接口
-    - match: ^https?://utestapi\.ulearning\.cn/exams/saveLocalCache
-      name: ulearning-filter
-      type: request
-      require-body: true
-      timeout: 8
-      max-size: 262144
+      timeout: 5
 
 script-providers:
   ulearning-block:
     url: https://raw.githubusercontent.com/FlyRenxing/yxyscript/refs/heads/main/ulearning-block.js
-    interval: 86400
-  ulearning-filter:
-    url: https://raw.githubusercontent.com/FlyRenxing/yxyscript/refs/heads/main/ulearning-filter.js
     interval: 86400
