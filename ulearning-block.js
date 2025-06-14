@@ -1,8 +1,10 @@
-// 直接拦截请求并返回成功响应
+// uLearning 统一拦截脚本
+console.log("[uLearning] 拦截请求: " + $request.url);
+
 $done({
   response: {
     status: 200,
     headers: {"Content-Type": "application/json"},
-    body: "{}"
+    body: '{"code":0,"message":"success","data":{}}'
   }
 });
