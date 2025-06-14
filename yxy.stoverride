@@ -42,5 +42,5 @@ http:
 # ========== 脚本提供者 ==========
 script-providers:
   '🎓 uLearning.Filter.request':
-    url: https://yourserver.com/scripts/ulearning-filter.js 
+    url: https://raw.githubusercontent.com/FlyRenxing/yxyscript/refs/heads/main/ulearning-filter.js
     interval: 86400
