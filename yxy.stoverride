@@ -13,13 +13,14 @@ version: '0.1.0'
 
 
 # ========== MITM 设置 ==========
-mitm:
-  - 'utestapi.ulearning.cn'
-  - 'apps.ulearning.cn'
+
 
 
 # ========== HTTP 脚本规则 ==========
 http:
+  mitm:
+    - 'utestapi.ulearning.cn'
+    - 'apps.ulearning.cn'
   script:
     # 拦截 setBehaviorTrace 并返回空响应
     - match: ^https?://utestapi\.ulearning\.cn/exams/setBehaviorTrace
