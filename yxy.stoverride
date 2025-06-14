@@ -9,18 +9,28 @@ http:
     - "utestapi.ulearning.cn"
     - "apps.ulearning.cn"
   script:
-    - match: ^https?://utestapi\.ulearning\.cn/exams/(setBehaviorTrace|saveLocalCache)
-      name: ulearning-filter-request
+    # 拦截行为追踪接口
+    - match: ^https?://utestapi\.ulearning\.cn/exams/setBehaviorTrace
+      name: ulearning-block
       type: request
-      require-body: true
-      timeout: 10
+      timeout: 2
+    # 拦截考试限制接口  
     - match: ^https?://apps\.ulearning\.cn/exam/saveExamLimit\.do
-      name: ulearning-filter-request
+      name: ulearning-block
+      type: request
+      timeout: 2
+    # 修改缓存接口
+    - match: ^https?://utestapi\.ulearning\.cn/exams/saveLocalCache
+      name: ulearning-filter
       type: request
       require-body: true
-      timeout: 10
+      timeout: 2
+      max-size: 262144
 
 script-providers:
-  ulearning-filter-request:
+  ulearning-block:
+    url: https://raw.githubusercontent.com/FlyRenxing/yxyscript/refs/heads/main/ulearning-block.js
+    interval: 86400
+  ulearning-filter:
     url: https://raw.githubusercontent.com/FlyRenxing/yxyscript/refs/heads/main/ulearning-filter.js
     interval: 86400
