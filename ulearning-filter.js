@@ -1,73 +1,59 @@
-// uLearning Filter Script
-const logPrefix = "[uLearning.Filter] ";
-const url = $request.url;
+// uLearning 过滤脚本 v7
+const log = (msg) => console.log("[uLearning] " + msg);
 
-console.log(logPrefix + "处理请求: " + url);
-
-// 直接拦截这两个接口，返回成功响应
-if (url.indexOf("setBehaviorTrace") !== -1 || url.indexOf("saveExamLimit") !== -1) {
-  console.log(logPrefix + "拦截请求: " + url);
-  $done({
-    response: {
-      status: 200,
-      headers: {"Content-Type": "application/json"},
-      body: "{}"
-    }
-  });
-  return;
-}
-
-// 处理 saveLocalCache 接口
-if (url.indexOf("saveLocalCache") !== -1) {
-  if (!$request.body) {
-    console.log(logPrefix + "请求体为空，直接放行");
-    $done({});
-    return;
-  }
+try {
+  const url = $request.url;
+  log("处理请求: " + url);
   
-  try {
-    console.log(logPrefix + "开始解析请求体");
+  // 拦截特定接口
+  if (url.includes("setBehaviorTrace") || url.includes("saveExamLimit")) {
+    log("拦截请求并返回空响应");
+    $done({
+      response: {
+        status: 200,
+        headers: {"Content-Type": "application/json"},
+        body: "{}"
+      }
+    });
+  }
+  // 过滤 saveLocalCache
+  else if (url.includes("saveLocalCache") && $request.body) {
+    log("开始处理 saveLocalCache 请求");
     const data = JSON.parse($request.body);
     
-    // 检查是否为数组格式
-    if (Array.isArray(data) && data.length > 0) {
+    if (Array.isArray(data)) {
+      log("检测到数组格式，开始处理...");
+      let totalOriginal = 0;
       let totalFiltered = 0;
       
-      // 遍历数组中的每个缓存对象
-      for (let i = 0; i < data.length; i++) {
-        const cacheItem = data[i];
-        
-        // 检查是否有 content 字段且为数组
-        if (cacheItem.content && Array.isArray(cacheItem.content)) {
-          const originalLength = cacheItem.content.length;
-          console.log(logPrefix + `缓存项 ${i} 原始 content 数量: ${originalLength}`);
+      data.forEach((item, index) => {
+        if (item.content && Array.isArray(item.content)) {
+          const original = item.content.length;
+          totalOriginal += original;
           
-          // 过滤 content 中的行为数据
-          cacheItem.content = cacheItem.content.filter(item => {
-            const keep = item.behaviorType === 1 || item.behaviorType === 4;
-            if (!keep) {
-              console.log(logPrefix + "过滤 behaviorType: " + item.behaviorType);
-              totalFiltered++;
-            }
-            return keep;
-          });
+          item.content = item.content.filter(behavior => 
+            behavior.behaviorType === 1 || behavior.behaviorType === 4
+          );
           
-          const filteredLength = cacheItem.content.length;
-          console.log(logPrefix + `缓存项 ${i} 过滤后 content 数量: ${filteredLength}`);
+          const filtered = item.content.length;
+          totalFiltered += filtered;
+          log(`缓存项${index}: ${original} -> ${filtered}`);
         }
-      }
+      });
       
-      console.log(logPrefix + "总共过滤掉 " + totalFiltered + " 条记录");
+      log(`总计: ${totalOriginal} -> ${totalFiltered} (过滤${totalOriginal - totalFiltered}条)`);
       $done({body: JSON.stringify(data)});
-      return;
     } else {
-      console.log(logPrefix + "数据格式不符合预期，直接放行");
+      log("数据格式不是数组，直接放行");
+      $done({});
     }
-  } catch (e) {
-    console.log(logPrefix + "JSON解析失败: " + e.message);
   }
+  // 默认放行
+  else {
+    log("不匹配规则，直接放行");
+    $done({});
+  }
+} catch (e) {
+  log("脚本异常: " + e.message);
+  $done({});
 }
-
-// 默认放行
-console.log(logPrefix + "请求放行");
-$done({});
